@@ -1,2 +1,2 @@
 # java-jenkins-template
-Template for Jenkins jobs for C++ projects. 
+Template for Jenkins jobs for Java projects. 
