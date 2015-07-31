@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<project name="XXX Application Build with check style" default="run" basedir="../">
+	<description>   
+        Ant build sample for running 
+        - checkstyle, 
+    </description>
+    
+     <!-- Change the paths to your individual installation directories -->
+    <property name="checkstyle.home.dir" location="${basedir}/tools/checkstyle/"/>
+    <property name="lib.dir" location="${basedir}/map/lib" />
+    <property name="src.dir" location="${basedir}/map/app/" />
+    <property name="bin.dir" location="${basedir}/bin" />
+    <property name="htm.dir" location="${basedir}/html" />
+    <property name="report.dir" location="${basedir}/report" />
+    <property name="report.checkstyle.dir" location="${report.dir}/checkstyle" />
+	
+	 <!-- Task of clean -->
+    <target name="clean" description="Delete all result to start with a clean build.">
+        <delete dir="${report.checkstyles.dir}" />
+        <delete dir="${report.temp.dir}" />
+        <delete dir="${bin.dir}" />
+    </target>
+    
+	<!-- Task of check style -->
+    <target name="report.checkstyle" 
+        description="Generate a report of code convention violations.">
+        <taskdef resource="checkstyletask.properties"
+                 classpath="${checkstyle.home.dir}/checkstyle-5.6-all.jar"
+        />
+
+        <!-- run verification of installation-->
+        <available file="${checkstyle.home.dir}/checkstyle-5.6-all.jar"
+                   property="checkstyle.available"
+        />
+        <fail unless="checkstyle.available"
+              message="Error: CHECKSTYLE_HOME not set or checkstyle-5.6-all.jar not found."
+        />
+        <mkdir dir="${report.checkstyle.dir}" />
+
+        <!-- run analysis-->
+        <checkstyle config="${checkstyle.home.dir}/sun_checks.xml"
+                    failureProperty="checkstyle.failure"
+                    failOnViolation="false"
+        >
+            <formatter type="xml" tofile="${report.checkstyle.dir}/checkstyle_report.xml" />
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </checkstyle>
+
+        <xslt in="${report.checkstyle.dir}/checkstyle_report.xml"
+               out="${report.checkstyle.dir}/checkstyle_report.html"
+               style="${checkstyle.home.dir}/contrib/checkstyle-noframes.xsl"
+        />
+    </target>
+
+	 <!-- -->
+    <target name="run"
+            description="Run the build"
+            depends="clean,report.checkstyle"
+    >
+    </target>
+</project>

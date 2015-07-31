@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+
+<project name="XXX Application Build with find bugs" default="run"
+	basedir="../">
+	<description>
+		Ant build sample for running
+		- findbugs,
+	</description>
+
+	<!-- Change the paths to your individual installation directories -->
+	<property name="findbugs.home.dir" location="${basedir}/tools" />
+	<property name="lib.dir" location="${basedir}/map/lib" />
+	<property name="src.dir" location="${basedir}/map/app/" />
+	<property name="bin.dir" location="${basedir}/bin" />
+	<property name="htm.dir" location="${basedir}/html" />
+	<property name="report.dir" location="${basedir}/report" />
+	<property name="report.findbugs.dir" location="${report.dir}/findbugs" />
+
+	<path id="run.classpath">
+		<pathelement path="${bin.dir}" />
+		<pathelement path="${findbugs.home.dir}/junit-4.5.jar" />
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${findbugs.home.dir}/play/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!-- Task of clean -->
+	<target name="clean" description="Delete all result to start with a clean build.">
+		<delete dir="${report.findbugs.dir}" />
+		<delete dir="${report.temp.dir}" />
+		<delete dir="${bin.dir}" />
+	</target>
+	
+	<!-- Task of prepare report -->
+	<target name="prepare.report.dir" description="Prepares the reports folder">
+		<mkdir dir="${report.findbugs.dir}" />
+	</target>
+
+	<!-- Task of check style -->
+	<target name="report.findbugs" depends="compile"
+		description="Run code analysis over code to check for problems.">
+		<!-- Fail this target if FindBugs is not installed. -->
+		<available file="${findbugs.home.dir}/findbugs/lib/findbugs.jar"
+			property="findbugs.available" />
+		<fail unless="findbugs.available"
+			message="Error: FINDBUGS_HOME not set or findbugs.jar not found." />
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+			classpath="${findbugs.home.dir}/findbugs/lib/findbugs-ant.jar" />
+
+		<!-- Run FindBugs. -->
+		<mkdir dir="${report.findbugs.dir}" />
+		<findbugs home="${findbugs.home.dir}/findbugs/lib/" workHard="true"
+			output="xml:withMessages" outputFile="${report.findbugs.dir}/findbugs_report.xml">
+			<class location="${bin.dir}" />
+			<auxClasspath>
+				<fileset file="${findbugs.home.dir}/junit-4.5.jar" />
+			</auxClasspath>
+		</findbugs>
+	</target>
+
+	<!-- -->
+	<target name="compile" depends="clean" description="Compile the entire project.">
+		<mkdir dir="${bin.dir}" />
+		<!-- debuglevel="lines, source" -->
+		<javac debug="true" srcdir="${src.dir}" destdir="${bin.dir}" 
+			classpathref="run.classpath" includeantruntime="false" deprecation="true" nowarn="on">
+			<compilerarg value="-Xlint"/>
+		</javac>	
+	</target>
+
+	<!-- -->
+	<target name="run" description="Run the build" depends="clean,prepare.report.dir,report.findbugs">
+	</target>
+</project>

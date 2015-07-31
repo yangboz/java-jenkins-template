@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<project name="XXX Application Build with PMD" default="run"
+	basedir="../">
+	<description>
+		Ant build sample for running
+		- PMD,
+	</description>
+
+	<!-- Change the paths to your individual installation directories -->
+	<property name="pmd.home.dir" location="${basedir}/tools/pmd/" />
+	<property name="lib.dir" location="${basedir}/map/lib" />
+	<property name="src.dir" location="${basedir}/map/app/" />
+	<property name="bin.dir" location="${basedir}/bin" />
+	<property name="htm.dir" location="${basedir}/html" />
+	<property name="report.dir" location="${basedir}/report" />
+	<property name="report.pmd.dir" location="${report.dir}/pmd" />
+
+	<!-- Task of clean -->
+	<target name="clean" description="Delete all result to start with a clean build.">
+		<delete dir="${report.pmd.dir}" />
+		<delete dir="${report.temp.dir}" />
+		<delete dir="${bin.dir}" />
+	</target>
+	
+	<!-- Task of prepare report -->
+	<target name="prepare.report.dir" description="Prepares the reports folder">
+		<mkdir dir="${report.pmd.dir}" />
+	</target>
+	
+	<!-- -->
+	<path id="pmd2.classpath">
+		<pathelement location="${build}" />
+		<fileset dir="${pmd.home.dir}/lib/">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- Task of PMD -->
+	<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask"
+		classpathref="pmd2.classpath" />
+	<target name="report.pmd">
+		<mkdir dir="${report.pmd.dir}" />
+		<!-- <pmd rulesetfiles="${pmd.home.dir}/lib/rulesets/pmd-ruleset.xml"> -->
+		<pmd>
+			<formatter type="xml" toFile="${report.pmd.dir}/pmd_report.xml" />
+			<ruleset>rulesets/java/basic.xml</ruleset> <!-- references file in PMD's .jar -->
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</pmd>
+		<xslt in="${report.pmd.dir}/pmd_report.xml" style="${pmd.home.dir}/etc/xslt/pmd-report-per-class.xslt"
+			out="${report.pmd.dir}/pmd_report.html" />
+	</target>
+
+	<!-- -->
+	<target name="run" description="Run the build" depends="clean,prepare.report.dir,report.pmd">
+	</target>
+</project>
